@@ -18,11 +18,12 @@ targets:
         excludes:
           - "WebUI/**"
           - "Resources/Assets.xcassets"
+      # Folder reference: preserves directory structure inside the app bundle
+      - path: moviesend/WebUI
+        type: folder
 
     resources:
       - path: moviesend/Resources/Assets.xcassets
-      - path: moviesend/WebUI
-        type: folder
 
     info:
       path: moviesend/Resources/Info.plist

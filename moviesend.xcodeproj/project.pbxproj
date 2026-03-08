@@ -3,13 +3,14 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 63;
+	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		160F67D5174D833C3701B218 /* PINManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC3436541B8C359678952C02 /* PINManager.swift */; };
 		19272173F4F33946972E3AAF /* VideoAsset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C672E38734AB42363D3DBD /* VideoAsset.swift */; };
 		333820C1711A088950EC4528 /* TransferProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54698DFDF67D3C9885FA6A0B /* TransferProgressView.swift */; };
+		38D3940FF5FEDC8CDC1352F2 /* WebUI in Resources */ = {isa = PBXBuildFile; fileRef = D8024CE8A8B387B45D20FEE5 /* WebUI */; };
 		4037EA4DBB075FF80A30A966 /* HTTPRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA03909D70452DE9866D4332 /* HTTPRequest.swift */; };
 		44273765AF9B236C8ABC83F7 /* VideoListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD21CCD23CEEB6946C3E8EBD /* VideoListViewModel.swift */; };
 		64677251E43C747106BD6CFC /* PhotosService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1280253C02DFE81CC7677050 /* PhotosService.swift */; };
@@ -38,7 +39,7 @@
 		4AFC74CE319A4F72FC25F460 /* ThumbnailImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThumbnailImage.swift; sourceTree = "<group>"; };
 		54698DFDF67D3C9885FA6A0B /* TransferProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferProgressView.swift; sourceTree = "<group>"; };
 		58A89635BCD56EF45B442F99 /* TransferViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferViewModel.swift; sourceTree = "<group>"; };
-		5A462A1C2AE8A68114A4740E /* moviesend.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = moviesend.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		5A462A1C2AE8A68114A4740E /* moviesend.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = moviesend.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F2DB34DDDB3ED58392E7899 /* URLPINViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLPINViewModel.swift; sourceTree = "<group>"; };
 		80F61CC3E535CEC25DE2730F /* Router.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Router.swift; sourceTree = "<group>"; };
 		87BE2EB0390523C047D7BEF4 /* URLPINView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLPINView.swift; sourceTree = "<group>"; };
@@ -46,6 +47,7 @@
 		ABEE677594BA4D7B4F3EDA8F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		BC742329CA03892FEFF66647 /* VideoRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoRowView.swift; sourceTree = "<group>"; };
 		CD987BD468FE02251C5C4850 /* SessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionManager.swift; sourceTree = "<group>"; };
+		D8024CE8A8B387B45D20FEE5 /* WebUI */ = {isa = PBXFileReference; lastKnownFileType = folder; name = WebUI; path = moviesend/WebUI; sourceTree = SOURCE_ROOT; };
 		DA03909D70452DE9866D4332 /* HTTPRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPRequest.swift; sourceTree = "<group>"; };
 		DD21CCD23CEEB6946C3E8EBD /* VideoListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoListViewModel.swift; sourceTree = "<group>"; };
 		DF89FFDCCBF8A0CFA8AD8C24 /* HTTPResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPResponse.swift; sourceTree = "<group>"; };
@@ -100,6 +102,7 @@
 				DD03E1CAE45D9D1B0E482FA5 /* Services */,
 				9FF80707C81B80EA37619BF5 /* ViewModels */,
 				05C31F4F6AC41872918BCCE6 /* Views */,
+				D8024CE8A8B387B45D20FEE5 /* WebUI */,
 			);
 			path = moviesend;
 			sourceTree = "<group>";
@@ -171,6 +174,7 @@
 			buildConfigurationList = FF588D468F79AE6AF092A52B /* Build configuration list for PBXNativeTarget "moviesend" */;
 			buildPhases = (
 				392BCF401BB8A85806C0959A /* Sources */,
+				614122612E33647777DEB032 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -202,6 +206,7 @@
 			);
 			mainGroup = 628DF397985D3CAB49F2FC72;
 			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -209,6 +214,17 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		614122612E33647777DEB032 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				38D3940FF5FEDC8CDC1352F2 /* WebUI in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		392BCF401BB8A85806C0959A /* Sources */ = {
@@ -247,7 +263,6 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = VNF6G3AWPG;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = moviesend/Resources/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
@@ -387,7 +402,6 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = VNF6G3AWPG;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = moviesend/Resources/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
