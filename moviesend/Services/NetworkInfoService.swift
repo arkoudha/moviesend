@@ -2,6 +2,12 @@ import Foundation
 import Network
 
 enum NetworkInfoService {
+    /// Returns the device's mDNS hostname (e.g. "iPhone-of-User.local")
+    static func getLocalHostname() -> String {
+        let h = ProcessInfo.processInfo.hostName
+        return h.hasSuffix(".local") ? h : "\(h).local"
+    }
+
     static func getLocalIPAddress() -> String? {
         var address: String?
         var ifaddr: UnsafeMutablePointer<ifaddrs>?

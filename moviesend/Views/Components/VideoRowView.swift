@@ -15,11 +15,10 @@ struct VideoRowView: View {
             }
             .buttonStyle(.plain)
 
-            // Thumbnail placeholder
-            RoundedRectangle(cornerRadius: 6)
-                .fill(Color(.secondarySystemFill))
+            // Thumbnail (async from Photos)
+            ThumbnailImage(asset: video.phAsset)
                 .frame(width: 56, height: 56)
-                .overlay { Image(systemName: "video.fill").foregroundColor(.secondary) }
+                .clipShape(RoundedRectangle(cornerRadius: 6))
 
             // Metadata
             VStack(alignment: .leading, spacing: 4) {

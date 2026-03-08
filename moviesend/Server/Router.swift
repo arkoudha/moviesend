@@ -99,11 +99,24 @@ final class Router {
             return .notFound()
         }
         let sem = DispatchSemaphore(value: 0)
-        var data: Data?
-        Task { data = await PhotosService.getThumbnail(for: asset.phAsset); sem.signal() }
+        var thumbnailData: Data?
+        let opts = PHImageRequestOptions()
+        opts.deliveryMode = .fastFormat
+        opts.isNetworkAccessAllowed = false
+        opts.isSynchronous = false
+        // Use PHImageManager directly (no Task) to avoid cooperative-thread-pool/semaphore deadlock
+        PHImageManager.default().requestImage(
+            for: asset.phAsset,
+            targetSize: CGSize(width: 240, height: 240),
+            contentMode: .aspectFill,
+            options: opts
+        ) { image, _ in
+            thumbnailData = image?.jpegData(compressionQuality: 0.75)
+            sem.signal()
+        }
         sem.wait()
-        guard let d = data else { return .notFound() }
-        return .ok(body: d, contentType: "image/jpeg")
+        guard let data = thumbnailData else { return .notFound() }
+        return .ok(body: data, contentType: "image/jpeg")
     }
 
     // MARK: - Video download (streaming)
@@ -191,8 +204,9 @@ final class Router {
         let filePath = request.path == "/" ? "index.html" : String(request.path.dropFirst())
         guard !filePath.contains("..") else { return .forbidden() }
 
-        guard let webUIDir = Bundle.main.url(forResource: "WebUI", withExtension: nil),
-              let data = try? Data(contentsOf: webUIDir.appendingPathComponent(filePath)) else {
+        // Folder references are copied to the bundle root — access via bundleURL, not url(forResource:)
+        let webUIDir = Bundle.main.bundleURL.appendingPathComponent("WebUI")
+        guard let data = try? Data(contentsOf: webUIDir.appendingPathComponent(filePath)) else {
             return .notFound()
         }
         let ext = URL(fileURLWithPath: filePath).pathExtension

@@ -25,7 +25,9 @@ struct URLPINView: View {
                 VStack(alignment: .leading, spacing: 10) {
                     Label("ブラウザでアクセス", systemImage: "safari")
                         .font(.subheadline).foregroundColor(.secondary)
-                    urlRow("http://moviesend.local:8080/", tag: "mDNS")
+                    if !vm.mdnsURL.isEmpty {
+                        urlRow(vm.mdnsURL, tag: "mDNS")
+                    }
                     if !vm.localIP.isEmpty {
                         urlRow("http://\(vm.localIP):8080/", tag: "IP直接")
                     }

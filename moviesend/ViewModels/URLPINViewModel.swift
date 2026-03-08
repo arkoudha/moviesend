@@ -4,6 +4,7 @@ import SwiftUI
 @MainActor
 final class URLPINViewModel: ObservableObject {
     @Published var localIP: String = ""
+    @Published var mdnsURL: String = ""
     @Published var pin: String = ""
     @Published var isServerRunning = false
     @Published var isClientConnected = false
@@ -30,7 +31,8 @@ final class URLPINViewModel: ObservableObject {
             try server.start()
             isServerRunning = true
             pin = pinManager.currentPIN
-            localIP = NetworkInfoService.getLocalIPAddress() ?? ""
+            localIP  = NetworkInfoService.getLocalIPAddress() ?? ""
+            mdnsURL  = "http://\(NetworkInfoService.getLocalHostname()):8080/"
         } catch {
             errorMessage = "サーバーの起動に失敗しました: \(error.localizedDescription)"
         }
