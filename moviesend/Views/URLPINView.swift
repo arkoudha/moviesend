@@ -6,13 +6,16 @@ struct URLPINView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.dismiss) private var dismiss
     @State private var navigateToProgress = false
+    /// true while TransferProgressView is on the stack — prevents onDisappear
+    /// from stopping the server when navigating FORWARD (which is the root
+    /// cause of ERR_CONNECTION_REFUSED during download).
+    @State private var navigatingToProgress = false
 
     var body: some View {
         ScrollView {
             VStack(spacing: 28) {
                 Spacer(minLength: 20)
 
-                // Icon + title
                 VStack(spacing: 8) {
                     Image(systemName: "laptopcomputer.and.iphone")
                         .font(.system(size: 52))
@@ -23,23 +26,17 @@ struct URLPINView: View {
                 }
 
                 if vm.isServerRunning {
-                    // URL card — サーバーが ready になってから表示
                     VStack(alignment: .leading, spacing: 10) {
                         Label("ブラウザでアクセス", systemImage: "safari")
                             .font(.subheadline).foregroundColor(.secondary)
-                        if !vm.mdnsURL.isEmpty {
-                            urlRow(vm.mdnsURL, tag: "mDNS")
-                        }
-                        if !vm.localIP.isEmpty {
-                            urlRow("http://\(vm.localIP):8080/", tag: "IP直接")
-                        }
+                        if !vm.mdnsURL.isEmpty { urlRow(vm.mdnsURL, tag: "mDNS") }
+                        if !vm.localIP.isEmpty { urlRow("http://\(vm.localIP):8080/", tag: "IP直接") }
                     }
                     .padding()
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
                     .transition(.opacity.combined(with: .move(edge: .top)))
 
-                    // PIN card — サーバーが ready になってから表示
                     VStack(spacing: 10) {
                         Text("PIN コード")
                             .font(.subheadline).foregroundColor(.secondary)
@@ -53,13 +50,11 @@ struct URLPINView: View {
                     .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
                     .transition(.opacity.combined(with: .move(edge: .top)))
                 } else {
-                    // 起動中プレースホルダー
                     ProgressView()
                         .scaleEffect(1.4)
                         .padding(.vertical, 40)
                 }
 
-                // Status
                 Group {
                     if vm.isClientConnected {
                         Label("接続済み", systemImage: "checkmark.circle.fill")
@@ -72,8 +67,7 @@ struct URLPINView: View {
                         .foregroundColor(.secondary)
                     } else {
                         Text("ローカルネットワーク許可が必要な場合はダイアログで「OK」を選んでください")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                            .font(.caption).foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
                     }
                 }
@@ -98,15 +92,29 @@ struct URLPINView: View {
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(vm.isServerRunning)
         .navigationDestination(isPresented: $navigateToProgress) {
-            TransferProgressView(selectedVideos: selectedVideos)
+            TransferProgressView(selectedVideos: selectedVideos, onFinish: {
+                // Called when transfer is done or cancelled from TransferProgressView.
+                // Stop server and pop both TransferProgressView and URLPINView.
+                navigatingToProgress = false
+                navigateToProgress   = false
+                vm.stopServer()
+                dismiss()
+            })
         }
         .onAppear { vm.startServer(with: selectedVideos) }
-        .onDisappear { vm.stopServer() }
+        .onDisappear {
+            // Only stop server when truly leaving (back/cancel), NOT when pushing
+            // TransferProgressView forward — that caused ERR_CONNECTION_REFUSED.
+            if !navigatingToProgress { vm.stopServer() }
+        }
         .onChange(of: scenePhase) { phase in
             if phase != .active { vm.stopServer() }
         }
         .onChange(of: vm.isClientConnected) { connected in
-            if connected { navigateToProgress = true }
+            if connected {
+                navigatingToProgress = true
+                navigateToProgress   = true
+            }
         }
         .alert("エラー", isPresented: .init(
             get: { vm.errorMessage != nil },

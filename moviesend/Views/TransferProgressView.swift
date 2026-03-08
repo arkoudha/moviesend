@@ -2,8 +2,11 @@ import SwiftUI
 
 struct TransferProgressView: View {
     let selectedVideos: [VideoAsset]
+    /// Called when the user finishes or cancels — stops the server and
+    /// navigates back to VideoListView (handled by URLPINView).
+    let onFinish: () -> Void
+
     @StateObject private var vm = TransferViewModel()
-    @Environment(\.dismiss) private var dismiss
     @State private var showCancelConfirm = false
 
     var body: some View {
@@ -26,9 +29,7 @@ struct TransferProgressView: View {
             }
         })
         .confirmationDialog("転送を中断しますか？", isPresented: $showCancelConfirm, titleVisibility: .visible) {
-            Button("中断する", role: .destructive) {
-                dismiss()
-            }
+            Button("中断する", role: .destructive) { onFinish() }
             Button("続ける", role: .cancel) { }
         }
         .onAppear { vm.setup(with: selectedVideos) }
@@ -63,7 +64,6 @@ struct TransferProgressView: View {
             }
             .listStyle(.plain)
 
-            // ブラウザ側でキャンセルされた場合などに戻れるよう常時表示
             Divider()
             Button("中断して戻る") { showCancelConfirm = true }
                 .foregroundColor(.red)
@@ -83,7 +83,7 @@ struct TransferProgressView: View {
             Text("\(vm.totalFiles)ファイル / \(formatSize(vm.totalSize)) を転送しました")
                 .foregroundColor(.secondary)
             Spacer()
-            Button("最初に戻る") { dismiss() }
+            Button("最初に戻る") { onFinish() }
                 .buttonStyle(.borderedProminent)
                 .padding(.bottom)
         }
