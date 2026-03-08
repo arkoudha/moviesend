@@ -16,38 +16,48 @@ struct URLPINView: View {
                 VStack(spacing: 8) {
                     Image(systemName: "laptopcomputer.and.iphone")
                         .font(.system(size: 52))
-                        .foregroundColor(.blue)
-                    Text("PCで接続してください")
+                        .foregroundColor(vm.isServerRunning ? .blue : .secondary)
+                    Text(vm.isServerRunning ? "PCで接続してください" : "サーバーを起動中…")
                         .font(.title2).fontWeight(.bold)
+                        .foregroundColor(vm.isServerRunning ? .primary : .secondary)
                 }
 
-                // URL card
-                VStack(alignment: .leading, spacing: 10) {
-                    Label("ブラウザでアクセス", systemImage: "safari")
-                        .font(.subheadline).foregroundColor(.secondary)
-                    if !vm.mdnsURL.isEmpty {
-                        urlRow(vm.mdnsURL, tag: "mDNS")
+                if vm.isServerRunning {
+                    // URL card — サーバーが ready になってから表示
+                    VStack(alignment: .leading, spacing: 10) {
+                        Label("ブラウザでアクセス", systemImage: "safari")
+                            .font(.subheadline).foregroundColor(.secondary)
+                        if !vm.mdnsURL.isEmpty {
+                            urlRow(vm.mdnsURL, tag: "mDNS")
+                        }
+                        if !vm.localIP.isEmpty {
+                            urlRow("http://\(vm.localIP):8080/", tag: "IP直接")
+                        }
                     }
-                    if !vm.localIP.isEmpty {
-                        urlRow("http://\(vm.localIP):8080/", tag: "IP直接")
-                    }
-                }
-                .padding()
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+                    .padding()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+                    .transition(.opacity.combined(with: .move(edge: .top)))
 
-                // PIN card
-                VStack(spacing: 10) {
-                    Text("PIN コード")
-                        .font(.subheadline).foregroundColor(.secondary)
-                    Text(vm.pin)
-                        .font(.system(size: 60, weight: .bold, design: .monospaced))
-                        .tracking(12)
-                        .foregroundColor(.primary)
+                    // PIN card — サーバーが ready になってから表示
+                    VStack(spacing: 10) {
+                        Text("PIN コード")
+                            .font(.subheadline).foregroundColor(.secondary)
+                        Text(vm.pin)
+                            .font(.system(size: 60, weight: .bold, design: .monospaced))
+                            .tracking(12)
+                            .foregroundColor(.primary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+                } else {
+                    // 起動中プレースホルダー
+                    ProgressView()
+                        .scaleEffect(1.4)
+                        .padding(.vertical, 40)
                 }
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
 
                 // Status
                 Group {
@@ -61,16 +71,14 @@ struct URLPINView: View {
                         }
                         .foregroundColor(.secondary)
                     } else {
-                        HStack(spacing: 8) {
-                            ProgressView().scaleEffect(0.8)
-                            Text("サーバー起動中…")
-                        }
-                        .foregroundColor(.orange)
+                        Text("ローカルネットワーク許可が必要な場合はダイアログで「OK」を選んでください")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
                     }
                 }
                 .font(.subheadline)
 
-                // File count
                 Text("\(selectedVideos.count)件の動画を転送します")
                     .font(.caption).foregroundColor(.secondary)
 
@@ -84,8 +92,9 @@ struct URLPINView: View {
                 .padding(.bottom)
             }
             .padding()
+            .animation(.easeOut(duration: 0.3), value: vm.isServerRunning)
         }
-        .navigationTitle("接続待機中")
+        .navigationTitle(vm.isServerRunning ? "接続待機中" : "起動中")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(vm.isServerRunning)
         .navigationDestination(isPresented: $navigateToProgress) {
