@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 63;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -38,7 +38,7 @@
 		4AFC74CE319A4F72FC25F460 /* ThumbnailImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThumbnailImage.swift; sourceTree = "<group>"; };
 		54698DFDF67D3C9885FA6A0B /* TransferProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferProgressView.swift; sourceTree = "<group>"; };
 		58A89635BCD56EF45B442F99 /* TransferViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferViewModel.swift; sourceTree = "<group>"; };
-		5A462A1C2AE8A68114A4740E /* moviesend.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = moviesend.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		5A462A1C2AE8A68114A4740E /* moviesend.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = moviesend.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F2DB34DDDB3ED58392E7899 /* URLPINViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLPINViewModel.swift; sourceTree = "<group>"; };
 		80F61CC3E535CEC25DE2730F /* Router.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Router.swift; sourceTree = "<group>"; };
 		87BE2EB0390523C047D7BEF4 /* URLPINView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLPINView.swift; sourceTree = "<group>"; };
@@ -202,7 +202,6 @@
 			);
 			mainGroup = 628DF397985D3CAB49F2FC72;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -248,6 +247,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = VNF6G3AWPG;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = moviesend/Resources/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
@@ -387,6 +387,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = VNF6G3AWPG;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = moviesend/Resources/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;

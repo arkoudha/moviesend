@@ -54,12 +54,18 @@ struct URLPINView: View {
                     if vm.isClientConnected {
                         Label("接続済み", systemImage: "checkmark.circle.fill")
                             .foregroundColor(.green)
-                    } else {
+                    } else if vm.isServerRunning {
                         HStack(spacing: 8) {
                             ProgressView().scaleEffect(0.8)
                             Text("接続待機中…")
                         }
                         .foregroundColor(.secondary)
+                    } else {
+                        HStack(spacing: 8) {
+                            ProgressView().scaleEffect(0.8)
+                            Text("サーバー起動中…")
+                        }
+                        .foregroundColor(.orange)
                     }
                 }
                 .font(.subheadline)
