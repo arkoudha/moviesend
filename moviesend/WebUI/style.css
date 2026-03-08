@@ -1,0 +1,162 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #f2f2f7;
+  color: #1c1c1e;
+  min-height: 100dvh;
+}
+
+.hidden   { display: none !important; }
+.muted    { color: #8e8e93; }
+
+/* ─── Pages ─────────────────────────────── */
+.page { min-height: 100dvh; }
+.center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+/* ─── Auth card ──────────────────────────── */
+.card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 40px 32px;
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 2px 24px rgba(0,0,0,.08);
+}
+.logo  { font-size: 52px; margin-bottom: 12px; }
+.card h1 { font-size: 26px; margin-bottom: 6px; }
+.card > p { color: #8e8e93; margin-bottom: 24px; font-size: 15px; }
+
+.pin-row { display: flex; gap: 8px; }
+
+#pin-input {
+  flex: 1;
+  padding: 13px 16px;
+  border: 2px solid #d1d1d6;
+  border-radius: 12px;
+  font-size: 22px;
+  font-family: ui-monospace, monospace;
+  text-transform: uppercase;
+  letter-spacing: 6px;
+  text-align: center;
+  outline: none;
+  transition: border-color .15s;
+}
+#pin-input:focus { border-color: #007aff; }
+
+button {
+  padding: 13px 20px;
+  background: #007aff;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity .15s;
+  white-space: nowrap;
+}
+button:disabled       { opacity: .4; cursor: default; }
+button:not(:disabled):hover { opacity: .85; }
+
+.error { color: #ff3b30; font-size: 14px; margin-top: 12px; }
+
+/* ─── Header (video list + progress) ─────── */
+header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  background: #fff;
+  border-bottom: 1px solid #e5e5ea;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+header h1 { font-size: 18px; flex: 1; }
+
+.select-all {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  color: #007aff;
+}
+.select-all input { width: 16px; height: 16px; accent-color: #007aff; cursor: pointer; }
+
+#download-btn { font-size: 14px; padding: 9px 16px; }
+.cancel-btn   { background: #ff3b30; font-size: 14px; padding: 9px 16px; }
+
+/* ─── Video list ─────────────────────────── */
+.video-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  background: #fff;
+  border-bottom: 1px solid #f2f2f7;
+  cursor: pointer;
+  transition: background .1s;
+}
+.video-item:hover { background: #f9f9fb; }
+.video-item input[type="checkbox"] {
+  width: 20px; height: 20px;
+  accent-color: #007aff;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.video-thumb {
+  width: 60px; height: 60px;
+  border-radius: 8px;
+  background: #e5e5ea;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.video-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+.video-info { flex: 1; min-width: 0; }
+.video-name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.video-meta { font-size: 12px; color: #8e8e93; margin-top: 3px; }
+
+/* ─── Progress list ──────────────────────── */
+.progress-list { padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+
+.progress-item {
+  background: #fff;
+  border-radius: 14px;
+  padding: 16px;
+}
+.progress-name { font-size: 14px; font-weight: 500; margin-bottom: 10px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.progress-bar-bg {
+  background: #e5e5ea;
+  border-radius: 4px;
+  height: 8px;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  background: #007aff;
+  height: 100%;
+  border-radius: 4px;
+  transition: width .2s linear;
+}
+.progress-bar-fill.done { background: #34c759; }
+
+.progress-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #8e8e93;
+  margin-top: 6px;
+}

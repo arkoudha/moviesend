@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MovieSend</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+
+    <!-- ① PIN認証ページ -->
+    <div id="auth-page" class="page center">
+      <div class="card">
+        <div class="logo">🎬</div>
+        <h1>MovieSend</h1>
+        <p>iPhoneに表示されたPINを入力してください</p>
+        <div class="pin-row">
+          <input id="pin-input" type="text" maxlength="4"
+                 placeholder="例: A3F7" autocomplete="off"
+                 autocapitalize="characters" spellcheck="false">
+          <button id="auth-btn" onclick="authenticate()">接続する</button>
+        </div>
+        <p id="auth-error" class="error hidden"></p>
+      </div>
+    </div>
+
+    <!-- ② 動画一覧ページ -->
+    <div id="videos-page" class="page hidden">
+      <header>
+        <h1>MovieSend</h1>
+        <span id="video-count" class="muted"></span>
+        <label class="select-all">
+          <input type="checkbox" id="select-all" onchange="toggleSelectAll()"> 全選択
+        </label>
+        <button id="download-btn" onclick="downloadSelected()" disabled>ダウンロード</button>
+      </header>
+      <div id="video-list"></div>
+    </div>
+
+    <!-- ③ ダウンロード進捗ページ -->
+    <div id="progress-page" class="page hidden">
+      <header>
+        <h1>ダウンロード中</h1>
+        <button class="cancel-btn" onclick="cancelDownload()">キャンセル</button>
+      </header>
+      <div id="progress-list" class="progress-list"></div>
+    </div>
+
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

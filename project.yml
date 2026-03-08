@@ -1,0 +1,45 @@
+name: moviesend
+options:
+  bundleIdPrefix: com.example
+  deploymentTarget:
+    iOS: "16.0"
+  xcodeVersion: "16"
+  createIntermediateGroups: true
+  groupSortPosition: top
+
+targets:
+  moviesend:
+    type: application
+    platform: iOS
+    deploymentTarget: "16.0"
+
+    sources:
+      - path: moviesend
+        excludes:
+          - "WebUI/**"
+          - "Resources/Assets.xcassets"
+
+    resources:
+      - path: moviesend/Resources/Assets.xcassets
+      - path: moviesend/WebUI
+        type: folder
+
+    info:
+      path: moviesend/Resources/Info.plist
+      properties:
+        CFBundleDisplayName: MovieSend
+        UILaunchScreen:
+          UIColorName: ""
+        NSPhotoLibraryUsageDescription: "動画をPCに転送するためにフォトライブラリへのアクセスが必要です"
+        NSLocalNetworkUsageDescription: "同一Wi-Fi内のPCへ動画を転送するためにローカルネットワークへのアクセスが必要です"
+        NSBonjourServices:
+          - _moviesend._tcp
+          - _http._tcp
+
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.example.moviesend
+      SWIFT_VERSION: "5.9"
+      IPHONEOS_DEPLOYMENT_TARGET: "16.0"
+      ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+      ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+      ENABLE_PREVIEWS: "YES"
