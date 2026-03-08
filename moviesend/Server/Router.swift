@@ -128,89 +128,60 @@ final class Router {
             return
         }
 
-        // Use a plain DispatchQueue thread — NOT a Swift async Task.
-        // DispatchSemaphore.wait() inside Task starves the cooperative thread pool
-        // (pool size ≈ CPU core count), causing NWConnection send-completions to
-        // never fire → deadlock → browser gets "Failed to fetch".
+        // Run on a dedicated background thread so DispatchSemaphore.wait() is safe.
         DispatchQueue.global(qos: .userInitiated).async {
-            // Step 1: resolve PHAsset → file URL (callback-based, no await needed)
-            let avSem = DispatchSemaphore(value: 0)
-            var fileURL: URL?
-            let avOpts = PHVideoRequestOptions()
-            avOpts.isNetworkAccessAllowed = false
-            avOpts.deliveryMode = .highQualityFormat
-            PHImageManager.default().requestAVAsset(forVideo: asset.phAsset, options: avOpts) { avAsset, _, _ in
-                fileURL = (avAsset as? AVURLAsset)?.url
-                avSem.signal()
-            }
-            avSem.wait()
-
-            guard let url = fileURL else {
+            // Use PHAssetResource directly — avoids requestAVAsset which can return
+            // AVCompositionItem (not AVURLAsset) for HEVC/edited videos, causing nil URL.
+            let resources = PHAssetResource.assetResources(for: asset.phAsset)
+            guard let resource = resources.first(where: { $0.type == .video }) else {
                 self.send(.notFound(), on: connection, completion: completion)
                 return
             }
 
-            // Step 2: open file
-            guard let attrs = try? FileManager.default.attributesOfItem(atPath: url.path),
-                  let fileHandle = try? FileHandle(forReadingFrom: url) else {
-                self.send(.notFound(), on: connection, completion: completion)
-                return
-            }
-            defer { try? fileHandle.close() }
-            let fileSize = attrs[.size] as? Int64 ?? 0
+            // File size from resource metadata (same source used when building video list)
+            let fileSize: Int64 = (resource.value(forKey: "fileSize") as? NSNumber)?.int64Value
+                                  ?? asset.size
+            let ext = (resource.originalFilename as NSString).pathExtension.lowercased()
+            let contentType = ext == "mp4" ? "video/mp4" : "video/quicktime"
 
-            // Step 3: resolve Range
-            let statusCode: Int
-            let statusText: String
-            let startByte: Int64
-            let sendLength: Int64
-            if let range = request.rangeHeader {
-                startByte  = range.start
-                sendLength = (range.end ?? (fileSize - 1)) - range.start + 1
-                statusCode = 206; statusText = "Partial Content"
-            } else {
-                startByte  = 0
-                sendLength = fileSize
-                statusCode = 200; statusText = "OK"
-            }
-
-            // Step 4: build and send response headers
-            let ext = url.pathExtension.lowercased()
-            let contentType = ext == "mov" ? "video/quicktime" : "video/mp4"
-            var hdrs: [String: String] = [
-                "Content-Type": contentType,
-                "Content-Length": "\(sendLength)",
-                "Content-Disposition": "attachment; filename=\"\(asset.filename)\"",
-                "Accept-Ranges": "bytes",
+            // Send response headers
+            let hdrs: [String: String] = [
+                "Content-Type":        contentType,
+                "Content-Length":      "\(fileSize)",
+                "Content-Disposition": "attachment; filename=\"\(resource.originalFilename)\"",
+                "Accept-Ranges":       "bytes",
                 "Access-Control-Allow-Origin": "*",
-                "Connection": "close"
+                "Connection":          "close"
             ]
-            if statusCode == 206 {
-                hdrs["Content-Range"] = "bytes \(startByte)-\(startByte + sendLength - 1)/\(fileSize)"
-            }
-            let headerData = HTTPResponse(statusCode: statusCode, statusText: statusText,
-                                         headers: hdrs, body: Data()).headerData()
+            let headerResp = HTTPResponse(statusCode: 200, statusText: "OK",
+                                          headers: hdrs, body: Data())
             let headerSem = DispatchSemaphore(value: 0)
-            connection.send(content: headerData, completion: .contentProcessed { _ in headerSem.signal() })
+            connection.send(content: headerResp.headerData(),
+                            completion: .contentProcessed { _ in headerSem.signal() })
             headerSem.wait()
 
-            // Step 5: stream file body in 256 KB chunks
-            guard (try? fileHandle.seek(toOffset: UInt64(startByte))) != nil else {
-                connection.cancel(); completion(); return
-            }
-            let chunkSize = 256 * 1024
-            var remaining = sendLength
-            while remaining > 0 {
-                let toRead = Int(min(Int64(chunkSize), remaining))
-                let chunk  = fileHandle.readData(ofLength: toRead)
-                guard !chunk.isEmpty else { break }
-                remaining -= Int64(chunk.count)
-                let chunkSem = DispatchSemaphore(value: 0)
-                connection.send(content: chunk, completion: .contentProcessed { _ in chunkSem.signal() })
-                chunkSem.wait()
-            }
-            connection.cancel()
-            completion()
+            // Stream video bytes via PHAssetResourceManager.
+            // dataReceivedHandler runs on Photos' internal serial queue — blocking it
+            // here with a semaphore provides natural backpressure (one chunk in flight
+            // at a time) and is safe because NWConnection fires completions on its own
+            // queue (separate from Photos' queue).
+            let opts = PHAssetResourceRequestOptions()
+            opts.isNetworkAccessAllowed = false
+
+            PHAssetResourceManager.default().requestData(
+                for: resource,
+                options: opts,
+                dataReceivedHandler: { data in
+                    let chunkSem = DispatchSemaphore(value: 0)
+                    connection.send(content: data,
+                                    completion: .contentProcessed { _ in chunkSem.signal() })
+                    chunkSem.wait()
+                },
+                completionHandler: { _ in
+                    connection.cancel()
+                    completion()
+                }
+            )
         }
     }
 

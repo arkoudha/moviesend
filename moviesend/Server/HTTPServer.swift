@@ -77,7 +77,7 @@ final class HTTPServer {
 
     private func accept(_ connection: NWConnection) {
         connectionsLock.lock()
-        guard connections.count < 3 else {
+        guard connections.count < 10 else {
             connectionsLock.unlock()
             connection.cancel()
             return

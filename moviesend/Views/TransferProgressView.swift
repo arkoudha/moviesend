@@ -4,6 +4,7 @@ struct TransferProgressView: View {
     let selectedVideos: [VideoAsset]
     @StateObject private var vm = TransferViewModel()
     @Environment(\.dismiss) private var dismiss
+    @State private var showCancelConfirm = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -15,37 +16,59 @@ struct TransferProgressView: View {
         }
         .navigationTitle("転送進捗")
         .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(!vm.isAllCompleted)
+        .navigationBarBackButtonHidden(true)
+        .toolbar(content: {
+            ToolbarItem(placement: .topBarTrailing) {
+                if !vm.isAllCompleted {
+                    Button("中断") { showCancelConfirm = true }
+                        .foregroundColor(.red)
+                }
+            }
+        })
+        .confirmationDialog("転送を中断しますか？", isPresented: $showCancelConfirm, titleVisibility: .visible) {
+            Button("中断する", role: .destructive) {
+                dismiss()
+            }
+            Button("続ける", role: .cancel) { }
+        }
         .onAppear { vm.setup(with: selectedVideos) }
     }
 
     // MARK: - Progress list
 
     private var progressList: some View {
-        List(vm.items) { item in
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text(item.filename)
-                        .font(.subheadline).fontWeight(.medium)
-                        .lineLimit(1)
-                    Spacer()
-                    if item.isCompleted {
-                        Image(systemName: "checkmark.circle.fill").foregroundColor(.green)
-                    } else if item.isCurrent {
-                        Text("\(Int(item.progress * 100))%")
-                            .font(.caption).foregroundColor(.blue)
-                    } else {
-                        Text("待機中").font(.caption).foregroundColor(.secondary)
+        VStack(spacing: 0) {
+            List(vm.items) { item in
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text(item.filename)
+                            .font(.subheadline).fontWeight(.medium)
+                            .lineLimit(1)
+                        Spacer()
+                        if item.isCompleted {
+                            Image(systemName: "checkmark.circle.fill").foregroundColor(.green)
+                        } else if item.isCurrent {
+                            Text("\(Int(item.progress * 100))%")
+                                .font(.caption).foregroundColor(.blue)
+                        } else {
+                            Text("待機中").font(.caption).foregroundColor(.secondary)
+                        }
+                    }
+                    if item.isCurrent || item.isCompleted {
+                        ProgressBarView(progress: item.isCompleted ? 1.0 : item.progress,
+                                       color: item.isCompleted ? .green : .blue)
                     }
                 }
-                if item.isCurrent || item.isCompleted {
-                    ProgressBarView(progress: item.isCompleted ? 1.0 : item.progress,
-                                   color: item.isCompleted ? .green : .blue)
-                }
+                .padding(.vertical, 4)
             }
-            .padding(.vertical, 4)
+            .listStyle(.plain)
+
+            // ブラウザ側でキャンセルされた場合などに戻れるよう常時表示
+            Divider()
+            Button("中断して戻る") { showCancelConfirm = true }
+                .foregroundColor(.red)
+                .padding()
         }
-        .listStyle(.plain)
     }
 
     // MARK: - Completion view
