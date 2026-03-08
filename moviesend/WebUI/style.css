@@ -33,22 +33,37 @@ body {
 .card h1 { font-size: 26px; margin-bottom: 6px; }
 .card > p { color: #8e8e93; margin-bottom: 24px; font-size: 15px; }
 
-.pin-row { display: flex; gap: 8px; }
+.pin-row {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
 
 #pin-input {
-  flex: 1;
-  padding: 13px 16px;
+  width: 100%;
+  padding: 16px;
   border: 2px solid #d1d1d6;
   border-radius: 12px;
-  font-size: 22px;
+  font-size: 28px;
   font-family: ui-monospace, monospace;
   text-transform: uppercase;
-  letter-spacing: 6px;
+  letter-spacing: 12px;
+  text-indent: 12px; /* compensate letter-spacing so text appears centered */
   text-align: center;
   outline: none;
   transition: border-color .15s;
 }
 #pin-input:focus { border-color: #007aff; }
+#pin-input::placeholder {
+  letter-spacing: 2px;
+  text-indent: 0;
+  font-size: 16px;
+  color: #c7c7cc;
+}
+
+#auth-btn {
+  width: 100%;
+}
 
 button {
   padding: 13px 20px;
