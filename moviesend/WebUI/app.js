@@ -202,8 +202,13 @@ async function downloadOne(v) {
       received += value.length;
       const elapsed = (Date.now() - tStart) / 1000 || 0.001;
       const speed   = received / elapsed;
-      if (total > 0) bar.style.width = `${(received / total * 100).toFixed(1)}%`;
-      bytesEl.textContent = `${fmtSize(received)} / ${fmtSize(total)}`;
+      if (total > 0) {
+        bar.style.width = `${(received / total * 100).toFixed(1)}%`;
+        bytesEl.textContent = `${fmtSize(received)} / ${fmtSize(total)}`;
+      } else {
+        // chunked encoding: no total size known
+        bytesEl.textContent = `${fmtSize(received)} 受信中…`;
+      }
       speedEl.textContent = `${fmtSize(speed)}/s`;
     }
 

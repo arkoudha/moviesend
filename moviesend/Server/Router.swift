@@ -128,28 +128,32 @@ final class Router {
             return
         }
 
-        // Run on a dedicated background thread so DispatchSemaphore.wait() is safe.
         DispatchQueue.global(qos: .userInitiated).async {
-            // Use PHAssetResource directly — avoids requestAVAsset which can return
-            // AVCompositionItem (not AVURLAsset) for HEVC/edited videos, causing nil URL.
             let resources = PHAssetResource.assetResources(for: asset.phAsset)
-            guard let resource = resources.first(where: { $0.type == .video }) else {
+
+            // Prefer .video; fall back to .fullSizeVideo / .pairedVideo for slow-mo/Cinematic
+            let resource = resources.first(where: { $0.type == .video })
+                        ?? resources.first(where: { $0.type == .fullSizeVideo })
+                        ?? resources.first
+
+            guard let resource else {
+                print("[Download] ❌ No resource found for asset: \(asset.id)")
                 self.send(.notFound(), on: connection, completion: completion)
                 return
             }
+            print("[Download] ✅ Resource: \(resource.originalFilename), type: \(resource.type.rawValue)")
 
-            // File size from resource metadata (same source used when building video list)
-            let fileSize: Int64 = (resource.value(forKey: "fileSize") as? NSNumber)?.int64Value
-                                  ?? asset.size
             let ext = (resource.originalFilename as NSString).pathExtension.lowercased()
             let contentType = ext == "mp4" ? "video/mp4" : "video/quicktime"
 
-            // Send response headers
+            // Use Transfer-Encoding: chunked — avoids Content-Length inaccuracy.
+            // PHAssetResource.fileSize can differ from actual bytes delivered by
+            // requestData, causing the browser to wait forever then throw "Failed to fetch"
+            // when the connection closes before the promised bytes arrive.
             let hdrs: [String: String] = [
                 "Content-Type":        contentType,
-                "Content-Length":      "\(fileSize)",
+                "Transfer-Encoding":   "chunked",
                 "Content-Disposition": "attachment; filename=\"\(resource.originalFilename)\"",
-                "Accept-Ranges":       "bytes",
                 "Access-Control-Allow-Origin": "*",
                 "Connection":          "close"
             ]
@@ -159,25 +163,39 @@ final class Router {
             connection.send(content: headerResp.headerData(),
                             completion: .contentProcessed { _ in headerSem.signal() })
             headerSem.wait()
+            print("[Download] ✅ Headers sent")
 
-            // Stream video bytes via PHAssetResourceManager.
-            // dataReceivedHandler runs on Photos' internal serial queue — blocking it
-            // here with a semaphore provides natural backpressure (one chunk in flight
-            // at a time) and is safe because NWConnection fires completions on its own
-            // queue (separate from Photos' queue).
             let opts = PHAssetResourceRequestOptions()
             opts.isNetworkAccessAllowed = false
+            var totalSent = 0
 
             PHAssetResourceManager.default().requestData(
                 for: resource,
                 options: opts,
                 dataReceivedHandler: { data in
+                    // Wrap in HTTP chunked-encoding frame: "{hex-len}\r\n{data}\r\n"
+                    var frame = Data()
+                    frame.append(String(format: "%X\r\n", data.count).data(using: .utf8)!)
+                    frame.append(data)
+                    frame.append("\r\n".data(using: .utf8)!)
+
                     let chunkSem = DispatchSemaphore(value: 0)
-                    connection.send(content: data,
+                    connection.send(content: frame,
                                     completion: .contentProcessed { _ in chunkSem.signal() })
                     chunkSem.wait()
+                    totalSent += data.count
                 },
-                completionHandler: { _ in
+                completionHandler: { error in
+                    if let error {
+                        print("[Download] ❌ requestData error: \(error)")
+                    } else {
+                        print("[Download] ✅ Done, sent \(totalSent) bytes")
+                    }
+                    // Send HTTP chunked terminator "0\r\n\r\n" then close
+                    let termSem = DispatchSemaphore(value: 0)
+                    connection.send(content: "0\r\n\r\n".data(using: .utf8)!,
+                                    completion: .contentProcessed { _ in termSem.signal() })
+                    termSem.wait()
                     connection.cancel()
                     completion()
                 }
